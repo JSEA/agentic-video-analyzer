@@ -1,6 +1,6 @@
 # video-analyzer
 
-Video analysis toolkit that produces .avt (Agentic Video Transcript) files from any video source. Foundation layer for the Idea Miner pipeline.
+Video analysis toolkit that produces .avt (Agentic Video Transcript) files from any video source.
 
 ## Tech Stack
 - Python 3.11+
@@ -16,6 +16,9 @@ python3 scripts/preflight.py --check                # verify dependencies
 python3 scripts/preflight.py                        # install dependencies
 ```
 
+## Skill
+- `/analyze <url-or-path>` — Claude Code skill in `.claude/skills/analyze/SKILL.md`
+
 ## Architecture
 ```
 analyze.py (orchestrator)
@@ -27,15 +30,6 @@ analyze.py (orchestrator)
   -> avt.py         (assemble .avt file)
   -> cleanup        (temp files + Gemini uploaded file)
 ```
-
-## Skill
-- `/analyze <url-or-path>` — Claude Code skill in `.claude/skills/analyze/SKILL.md`
-
-## Key Docs
-- [Design Spec](docs/specs/2026-05-16-video-analyzer-design.md)
-- [PRD](docs/PRD.md)
-- [AVT Format Spec](docs/avt-spec.md)
-- [Build Checklist](docs/scratchpad.md)
 
 ## Configuration
 API keys in `~/.config/video-analyzer/.env`:
