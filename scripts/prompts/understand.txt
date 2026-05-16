@@ -1,0 +1,7 @@
+Analyze this video and identify all key visual moments. For each distinct visual segment, provide:
+- start: timestamp when this segment begins (MM:SS format)
+- end: timestamp when this segment ends (MM:SS format)
+- visual: 1-2 sentence description of what is shown on screen. Focus on: environment/setup, screen content, people visible, text on screen, production quality indicators.
+- scene: one tag from this list: intro, outro, hook, cta, sponsor, talking-head, screen-recording, demo, tutorial, slide, diagram, whiteboard, code, b-roll, montage, transition, interview, reaction, commentary, other
+
+Return ONLY the JSON array. Aim for segments of 3-30 seconds each. Capture every meaningful visual change.
