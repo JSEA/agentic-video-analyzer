@@ -84,6 +84,58 @@ FRAME: frames/frame-002.jpg
 
 Full format spec: [docs/avt-spec.md](docs/avt-spec.md)
 
+## Use Cases
+
+You can append any question or instruction after the URL. Claude analyzes the video first, then answers using the full context (visual descriptions, transcript, and frame images).
+
+### Content research
+```
+/analyze https://youtube.com/watch?v=abc123 break down the hook — what did they do in the first 10 seconds?
+/analyze https://youtube.com/watch?v=abc123 what CTAs did they use and where?
+/analyze https://youtube.com/watch?v=abc123 how did they structure this video? what sections did they use?
+```
+
+### Learn from videos
+```
+/analyze https://youtube.com/watch?v=abc123 share me the best moments for learning with the relevant screenshots
+/analyze https://youtube.com/watch?v=abc123 summarize every topic covered
+/analyze https://youtube.com/watch?v=abc123 explain the key concepts from this tutorial
+```
+
+### Production analysis
+```
+/analyze https://youtube.com/watch?v=abc123 what's their production setup? show me
+/analyze https://youtube.com/watch?v=abc123 find every time they show a diagram and show me the screenshots
+/analyze https://youtube.com/watch?v=abc123 what's on screen at 3:45?
+```
+
+### Zoom into a section
+```
+/analyze https://youtube.com/watch?v=abc123 --start 0:00 --end 0:30 break down the intro visually
+/analyze https://youtube.com/watch?v=abc123 --start 10:00 --end 12:00 what do they demo here?
+```
+
+### Debug screen recordings
+```
+/analyze /path/to/bug-recording.mp4 what happens right before the crash?
+/analyze recording.mov --start 0:15 --end 0:25 what state change causes the error?
+```
+
+### Compare multiple videos
+Analyze several videos, then ask Claude to find patterns across the `.avt` files:
+```
+/analyze https://youtube.com/watch?v=video1
+/analyze https://youtube.com/watch?v=video2
+/analyze https://youtube.com/watch?v=video3
+```
+Then: "Compare these 3 videos — what patterns do you see in their hooks, structure, and CTAs?"
+
+### Meeting and loom notes
+```
+/analyze https://www.loom.com/share/abc123 give me structured notes from this meeting
+/analyze recording.mp4 what action items were discussed?
+```
+
 ## How it works
 
 1. **Download** — yt-dlp fetches the video (supports 400+ sites via yt-dlp)
