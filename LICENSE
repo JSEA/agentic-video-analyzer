@@ -28,6 +28,14 @@ purposes only, subject to the following conditions:
 5. SHARE-ALIKE. If you distribute modified versions of the Software, you must
    do so under this same license.
 
+6. FORMAT TRADEMARK. The .avt file format, the "Agentic Video Transcript" name,
+   and the "AGENTIC-VT" header identifier are trademarks of Frank Nillard. You
+   may implement software that reads and writes .avt files (interoperability is
+   encouraged), but you may not claim authorship of the format, create competing
+   format specifications using the .avt extension or "Agentic Video Transcript"
+   name, or use these marks in a way that implies endorsement without written
+   permission from the copyright holder.
+
 For commercial licensing inquiries, contact the copyright holder.
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR

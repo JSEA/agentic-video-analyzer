@@ -226,3 +226,5 @@ python3 scripts/analyze.py https://youtube.com/watch?v=VIDEO_ID
 Copyright (c) 2026 Frank Nillard. Source-Available (Non-Commercial).
 
 Free for personal and educational use. Commercial use requires written permission. See [LICENSE](LICENSE) for full terms.
+
+The .avt format, "Agentic Video Transcript" name, and "AGENTIC-VT" identifier are trademarks™ of Frank Nillard.

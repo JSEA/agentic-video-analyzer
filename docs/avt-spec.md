@@ -1,8 +1,11 @@
-# .avt Format Specification — Agentic Video Transcript
+# .avt Format Specification — Agentic Video Transcript™
 
 **Version:** 1.0
 **Author:** Frank Nillard
 **Date:** 2026-05-16
+**Copyright:** (c) 2026 Frank Nillard. All rights reserved.
+
+> The .avt (Agentic Video Transcript) format and the "Agentic Video Transcript" name are trademarks of Frank Nillard. The format specification is provided for interoperability purposes. You may implement parsers and writers for .avt files, but you may not claim authorship of the format or create competing specifications using the .avt name or "Agentic Video Transcript" branding without written permission.
 
 ## Purpose
 
