@@ -23,6 +23,9 @@ https://github.com/docusphere/video-analyzer
 
 ```
 /analyze https://youtube.com/watch?v=VIDEO_ID
+/analyze https://vimeo.com/123456789
+/analyze https://x.com/user/status/123456789
+/analyze /path/to/local-video.mp4
 ```
 
 **3. That's it** — On first run, Claude will automatically:
