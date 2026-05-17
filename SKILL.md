@@ -60,9 +60,17 @@ Within a single session, skip Step 0 on follow-up `/analyze` calls once `--check
 
 **Step 2 — Run the analyzer.**
 
+Run with a 10-minute timeout (the maximum allowed):
+
 ```bash
 python3 "${CLAUDE_SKILL_DIR}/scripts/analyze.py" "<source>" --out-dir .
 ```
+
+Use `timeout: 600000` on the Bash tool call.
+
+**If the command times out:** The script saves checkpoints automatically. Simply re-run the exact same command with `run_in_background: true`. It will resume from where it left off (skipping download and transcript if already completed). You will be notified when it finishes.
+
+**If it times out again in background mode:** This should not happen (background has no timeout), but if the process fails, re-run — checkpoints ensure no work is repeated.
 
 Optional flags:
 - `--max-frames N` — Cap on extracted frames (default: 80)

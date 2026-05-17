@@ -2,9 +2,14 @@
 """
 video-analyzer — Orchestrator
 Takes any video URL or local file and produces an .avt file with frames.
+
+Supports checkpointing: saves intermediate results to the output directory
+so that if the process is interrupted (e.g. timeout), re-running the same
+command resumes from the last completed step.
 """
 
 import argparse
+import json
 import os
 import shutil
 import sys
@@ -50,6 +55,29 @@ def get_cache_dir() -> str:
     return cache_dir
 
 
+def _save_checkpoint(video_out_dir: str, name: str, data: dict):
+    """Save intermediate result as a checkpoint JSON file."""
+    checkpoint_path = os.path.join(video_out_dir, f".checkpoint_{name}.json")
+    with open(checkpoint_path, 'w') as f:
+        json.dump(data, f)
+
+
+def _load_checkpoint(video_out_dir: str, name: str):
+    """Load a checkpoint if it exists. Returns None if not found."""
+    checkpoint_path = os.path.join(video_out_dir, f".checkpoint_{name}.json")
+    if os.path.exists(checkpoint_path):
+        with open(checkpoint_path, 'r') as f:
+            return json.load(f)
+    return None
+
+
+def _clear_checkpoints(video_out_dir: str):
+    """Remove checkpoint files after successful completion."""
+    for f in os.listdir(video_out_dir):
+        if f.startswith('.checkpoint_'):
+            os.remove(os.path.join(video_out_dir, f))
+
+
 def main():
     args = parse_args()
 
@@ -67,9 +95,50 @@ def main():
     cache_dir = get_cache_dir()
 
     try:
+        # Parse time range
+        start_sec = _parse_time(args.start) if args.start else None
+        end_sec = _parse_time(args.end) if args.end else None
+
+        # Determine output directory early (needed for checkpoints)
+        base_out_dir = os.path.abspath(args.out_dir)
+
         # Step 1: Download
-        print("Step 1/5: Downloading video...", file=sys.stderr)
-        dl = download_video(args.source, cache_dir)
+        # Check for existing checkpoint from a previous interrupted run
+        # We need the slug first to find the right checkpoint dir,
+        # but slug comes from download. Use source URL hash as temp identifier.
+        temp_id = str(hash(args.source))[-8:]
+        temp_checkpoint_dir = os.path.join(base_out_dir, 'avt_outputs', f".pending_{temp_id}")
+
+        dl_checkpoint = _load_checkpoint(temp_checkpoint_dir, 'download') if os.path.isdir(temp_checkpoint_dir) else None
+
+        if dl_checkpoint:
+            print("Step 1/5: Resuming — download checkpoint found", file=sys.stderr)
+            dl = dl_checkpoint
+            # Verify video file still exists in cache
+            if not os.path.exists(dl['video_path']):
+                print("Step 1/5: Video file missing, re-downloading...", file=sys.stderr)
+                dl_checkpoint = None
+
+        if not dl_checkpoint:
+            print("Step 1/5: Downloading video...", file=sys.stderr)
+            dl = download_video(args.source, cache_dir)
+
+        # Now we have the slug — set up the real output directory
+        video_out_dir = os.path.join(base_out_dir, 'avt_outputs', dl['slug'])
+        os.makedirs(video_out_dir, exist_ok=True)
+
+        # If we were using a temp checkpoint dir, migrate to the real one
+        if os.path.isdir(temp_checkpoint_dir) and temp_checkpoint_dir != video_out_dir:
+            for f in os.listdir(temp_checkpoint_dir):
+                if f.startswith('.checkpoint_'):
+                    src = os.path.join(temp_checkpoint_dir, f)
+                    dst = os.path.join(video_out_dir, f)
+                    if not os.path.exists(dst):
+                        shutil.move(src, dst)
+            shutil.rmtree(temp_checkpoint_dir, ignore_errors=True)
+
+        # Save download checkpoint
+        _save_checkpoint(video_out_dir, 'download', dl)
 
         # Duration guard
         if dl['duration'] > 5400 and not args.force_long:  # 90 minutes
@@ -83,18 +152,19 @@ def main():
             print(f"Video file too large ({video_size / 1e9:.1f} GB). Max 2 GB.", file=sys.stderr)
             sys.exit(1)
 
-        # Parse time range
-        start_sec = _parse_time(args.start) if args.start else None
-        end_sec = _parse_time(args.end) if args.end else None
-
         # Step 2: Transcribe
-        print("Step 2/5: Extracting transcript...", file=sys.stderr)
-        transcript = get_transcript(
-            subtitle_path=dl['subtitle_path'],
-            video_path=dl['video_path'],
-            whisper_backend=args.whisper,
-            no_whisper=args.no_whisper,
-        )
+        transcript = _load_checkpoint(video_out_dir, 'transcript')
+        if transcript:
+            print("Step 2/5: Resuming — transcript checkpoint found", file=sys.stderr)
+        else:
+            print("Step 2/5: Extracting transcript...", file=sys.stderr)
+            transcript = get_transcript(
+                subtitle_path=dl['subtitle_path'],
+                video_path=dl['video_path'],
+                whisper_backend=args.whisper,
+                no_whisper=args.no_whisper,
+            )
+            _save_checkpoint(video_out_dir, 'transcript', transcript)
 
         # Filter transcript to range if specified
         if start_sec is not None or end_sec is not None:
@@ -103,12 +173,17 @@ def main():
             )
 
         # Step 3: Gemini visual understanding
-        print("Step 3/5: Analyzing video with Gemini...", file=sys.stderr)
-        api_key = _load_key('GOOGLE_API_KEY', ENV_FILE)
-        visual_segments = understand_video(
-            dl['video_path'], api_key,
-            start_time=args.start, end_time=args.end,
-        )
+        visual_segments = _load_checkpoint(video_out_dir, 'visual')
+        if visual_segments:
+            print("Step 3/5: Resuming — Gemini checkpoint found", file=sys.stderr)
+        else:
+            print("Step 3/5: Analyzing video with Gemini...", file=sys.stderr)
+            api_key = _load_key('GOOGLE_API_KEY', ENV_FILE)
+            visual_segments = understand_video(
+                dl['video_path'], api_key,
+                start_time=args.start, end_time=args.end,
+            )
+            _save_checkpoint(video_out_dir, 'visual', visual_segments)
 
         # Filter visual segments to range
         if start_sec is not None or end_sec is not None:
@@ -118,10 +193,6 @@ def main():
 
         # Step 4: Extract frames
         print("Step 4/5: Extracting frames...", file=sys.stderr)
-        base_out_dir = os.path.abspath(args.out_dir)
-        video_out_dir = os.path.join(base_out_dir, 'avt_outputs', dl['slug'])
-        os.makedirs(video_out_dir, exist_ok=True)
-
         width = 256 if args.low_res else 512
         frame_results = extract_frames(
             dl['video_path'], visual_segments, video_out_dir,
@@ -164,13 +235,16 @@ def main():
         avt_path = os.path.join(video_out_dir, f"{dl['slug']}.avt")
         write_avt(metadata, aligned, avt_path)
 
+        # Clean up checkpoints on success
+        _clear_checkpoints(video_out_dir)
+
         # Output final path to stdout
         print(avt_path)
         print(f"\nDone! {len(aligned)} segments, {len(frame_results)} frames.", file=sys.stderr)
         print(f"Output: {video_out_dir}", file=sys.stderr)
 
     finally:
-        # Cleanup temp files
+        # Cleanup temp files (but NOT checkpoints — those enable resume)
         if os.path.exists(cache_dir):
             shutil.rmtree(cache_dir, ignore_errors=True)
 
