@@ -4,7 +4,7 @@ description: Analyze any video (URL or local file). Downloads with yt-dlp, uploa
 argument-hint: "<video-url-or-path>"
 allowed-tools: Bash, Read, AskUserQuestion
 homepage: https://github.com/JSEA/agentic-video-analyzer
-repository: https://github.com/JSEA/agentic-video-analyzer.git
+repository: https://github.com/JSEA/agentic-video-analyzer
 user-invocable: true
 ---
 
