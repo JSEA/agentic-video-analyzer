@@ -3,10 +3,8 @@ name: analyze
 description: Analyze any video (URL or local file). Downloads with yt-dlp, uploads to Gemini 2.5 Flash for native video understanding, extracts transcript (captions or Whisper fallback), pulls JPEG frames at AI-identified key moments, and produces a structured .avt (Agentic Video Transcript) file for agent consumption.
 argument-hint: "<video-url-or-path>"
 allowed-tools: Bash, Read, AskUserQuestion
-homepage: https://github.com/docusphere/video-analyzer
-repository: https://github.com/docusphere/video-analyzer
-author: docusphere
-license: Source-Available (Non-Commercial)
+homepage: https://github.com/JSEA/agentic-video-analyzer
+repository: https://github.com/JSEA/agentic-video-analyzer.git
 user-invocable: true
 ---
 
