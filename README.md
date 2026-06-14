@@ -1,4 +1,4 @@
-# video-analyzer
+# agentic-video-analyzer
 
 Analyze any video and produce an `.avt` (Agentic Video Transcript) file — a structured, plain-text format designed for AI agent consumption.
 
@@ -18,7 +18,7 @@ Three ways to install, depending on how you want to use it.
 Clone to your global Claude Code skills directory. After this, `/analyze` is available in every project you open:
 
 ```bash
-git clone https://github.com/docusphere/video-analyzer.git ~/.claude/skills/analyze
+git clone https://github.com/JSEA/agentic-video-analyzer.git ~/.claude/skills/analyze
 ```
 
 ### Option B: Project-Local Install (works in one project only)
@@ -27,16 +27,7 @@ Clone into a specific project's `.claude/skills/` directory. The skill only work
 
 ```bash
 cd /path/to/your-project
-git clone https://github.com/docusphere/video-analyzer.git .claude/skills/analyze
-```
-
-### Option C: Plugin Marketplace
-
-If available, install via the Claude Code plugin system:
-
-```
-/plugin marketplace add docusphere/video-analyzer
-/plugin install analyze@video-analyzer
+git clone https://github.com/JSEA/agentic-video-analyzer.git .claude/skills/analyze
 ```
 
 ### First run
